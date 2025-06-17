@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calificaciones - Colegio ZAMANEb</title>
+  <style>
+    :root {
+      --rojo: #d72631;
+      --azul: #0a1d37;
+      --blanco: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(130deg, var(--azul), #133870, var(--rojo));
+      color: var(--blanco);
+      padding-bottom: 50px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--blanco);
+      color: var(--azul);
+      padding: 15px 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    header img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+    }
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      background: var(--blanco);
+      color: var(--azul);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fdfdfd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    th {
+      background: var(--azul);
+      color: var(--blanco);
+    }
+    tr:nth-child(even) {
+      background: #f5f5f5;
+    }
+    .rojo {
+      color: var(--rojo);
+      font-weight: bold;
+    }
+    input, select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 5px;
+      width: 200px;
+    }
+    .filtros {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .btn {
+      display: inline-block;
+      margin: 15px auto;
+      padding: 10px 20px;
+      background: var(--rojo);
+      color: var(--blanco);
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: #a91f28;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado con logo -->
+  <header>
+    <img src="log.jpeg" alt="Logo Colegio ZAMANEb">
+    <h1>Colegio Mixto ZAMANEB - Calificaciones</h1>
+  </header>
+
+  <div class="container">
+    <h2>Resumen de Calificaciones - Computación</h2>
+
+    <div class="filtros">
+      <input type="text" id="buscarNombre" placeholder="Buscar por nombre..." onkeyup="filtrarTabla()">
+      <select id="filtroGrado" onchange="filtrarTabla()">
+        <option value="">Todos los grados</option>
+        <option value="4to A">4to A</option>
+        <option value="4to B">4to B</option>
+        <option value="5to A">5to A</option>
+        <option value="5to B">5to B</option>
+        <option value="6to">6to</option>
+      </select>
+      <select id="filtroBimestre" onchange="filtrarTabla()">
+        <option value="">Todos los bimestres</option>
+        <option value="B1">Bimestre 1</option>
+        <option value="B2">Bimestre 2</option>
+        <option value="B3">Bimestre 3</option>
+        <option value="B4">Bimestre 4</option>
+      </select>
+    </div>
+
+    <table id="tablaCalificaciones">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Grado</th>
+          <th>Clave</th>
+          <th>Bimestre</th>
+          <th>Computación</th>
+          <th>Promedio</th>
+          <th>Resumen</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="text-align: center;">
+      <a href="registro.html" class="btn">Ir a Registro</a>
+        <a href="index.html" class="btn">Ir al Menu</a>
+    </div>
+  </div>
+
+  <footer>&copy; 2025 · Colegio Mixto ZAMANEb · Ciencia, Arte y Progreso</footer>
+
+  <script>
+    function mostrarDatos() {
+      const tbody = document.querySelector('#tablaCalificaciones tbody');
+      tbody.innerHTML = '';
+      const datos = JSON.parse(localStorage.getItem('datosEstudiantes')) || [];
+
+      if (datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">No hay datos registrados.</td></tr>';
+        return;
+      }
+
+      datos.sort((a,b) => a.nombre.localeCompare(b.nombre,'es',{sensitivity:'base'}));
+
+      datos.forEach(e => {
+        if (!e.bimestres) return;
+        for (let b = 1; b <= 4; b++) {
+          const key = `B${b}`;
+          const nota = e.bimestres[key]?.Computacion;
+          if (nota === undefined || isNaN(nota)) continue;
+
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr data-nombre="${e.nombre.toLowerCase()}"
+                data-grado="${e.grado}"
+                data-bimestre="${key}">
+              <td>${e.nombre}</td>
+              <td>${e.grado}</td>
+              <td>${e.clave}</td>
+              <td>${key}</td>
+              <td class="${nota < 60 ? 'rojo' : ''}">${nota}</td>
+              <td>${nota}</td>
+              <td><button onclick="mostrarResumen('${e.nombre.replace(/'/g,"\\'")}', '${e.clave}')">Resumen</button></td>
+            </tr>`);
+        }
+      });
+    }
+
+    function filtrarTabla() {
+      const nombreFiltro = document.getElementById('buscarNombre').value.toLowerCase();
+      const gradoFiltro = document.getElementById('filtroGrado').value;
+      const bimestreFiltro = document.getElementById('filtroBimestre').value;
+      const filas = document.querySelectorAll('#tablaCalificaciones tbody tr');
+
+      filas.forEach(fila => {
+        const coincideNombre = fila.dataset.nombre.includes(nombreFiltro);
+        const coincideGrado = !gradoFiltro || fila.dataset.grado === gradoFiltro;
+        const coincideBimestre = !bimestreFiltro || fila.dataset.bimestre === bimestreFiltro;
+        fila.style.display = coincideNombre && coincideGrado && coincideBimestre ? '' : 'none';
+      });
+    }
+
+    function mostrarResumen(nombre, clave) {
+      alert(`Resumen de ${nombre}\n\nEstudiante asignado\nClave Única del Estudiante: ${clave}`);
+    }
+
+    window.onload = mostrarDatos;
+  </script>
+</body>
+</html>
